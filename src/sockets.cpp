@@ -166,6 +166,12 @@ Fastcgipp::SocketGroup::SocketGroup():
 
 Fastcgipp::SocketGroup::~SocketGroup()
 {
+	if (m_name)
+	{
+		std::remove(m_name.get()->c_str());
+		m_name.reset();
+	}
+
 #ifdef FASTCGIPP_LINUX
     close(m_poll);
 #endif
@@ -250,7 +256,6 @@ bool Fastcgipp::SocketGroup::listen(
         std::remove(name);
         return false;
     }
-    unlink(name);
 
     // Set the user and group of the socket
     if(owner!=nullptr && group!=nullptr)
@@ -263,6 +268,7 @@ bool Fastcgipp::SocketGroup::listen(
                     << " on the unix socket \"" << name << "\": " \
                     << std::strerror(errno));
             close(fd);
+            std::remove(name);
             return false;
         }
     }
@@ -276,6 +282,7 @@ bool Fastcgipp::SocketGroup::listen(
                     << std::dec << " on \"" << name << "\": " \
                     << std::strerror(errno));
             close(fd);
+            std::remove(name);
             return false;
         }
     }
@@ -285,9 +292,12 @@ bool Fastcgipp::SocketGroup::listen(
         ERROR_LOG("Unable to listen on unix socket :\"" << name << "\": "\
                 << std::strerror(errno));
         close(fd);
+        std::remove(name);
         return false;
     }
-
+    
+    m_name = std::shared_ptr<const std::string>(new std::string(name));
+    
     m_listeners.insert(fd);
     m_refreshListeners = true;
     return true;

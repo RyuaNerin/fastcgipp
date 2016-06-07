@@ -450,6 +450,8 @@ namespace Fastcgipp
         //! Remove a socket identifier to the poll list
         bool pollDel(const socket_t socket);
 
+		std::shared_ptr<const std::string> m_name;
+
 #if FASTCGIPP_LOG_LEVEL > 3
         //! Debug counter for incoming connections
         std::atomic_ullong m_incomingConnectionCount;
@@ -468,6 +470,8 @@ namespace Fastcgipp
 
         //! Debug counter for bytes received
         std::atomic_ullong m_bytesReceived;
+
+		// 
 #endif
     };
 }
